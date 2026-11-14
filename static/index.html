@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rust Web Application | Powered by Axum & Tokio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e17;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 52, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(247, 76, 0, 0.3);
+      --rust-orange: #f74c00;
+      --rust-orange-light: #ff6b2b;
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(247, 76, 0, 0.12) 0px, transparent 50%),
+        radial-gradient(at 90% 20%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 80%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* Header & Nav */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10, 14, 23, 0.85);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .logo-badge {
+      font-size: 1.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 10px rgba(247, 76, 0, 0.5));
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #fff 30%, var(--rust-orange-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.925rem;
+      transition: color 0.2s, background-color 0.2s;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      width: 100%;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 1rem 3.5rem;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(247, 76, 0, 0.12);
+      border: 1px solid rgba(247, 76, 0, 0.3);
+      color: var(--rust-orange-light);
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #ff8c42 0%, #f74c00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-card:hover {
+      border-color: rgba(247, 76, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.825rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+
+    /* Section Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.75rem;
+      margin-top: 2.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        font-size: 2.25rem;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.75rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Task Manager UI */
+    .task-form {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .input-field {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(10, 14, 23, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--rust-orange);
+      box-shadow: 0 0 0 3px rgba(247, 76, 0, 0.15);
+    }
+
+    .select-field {
+      background: rgba(10, 14, 23, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-field option {
+      background: #121826;
+      color: #fff;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--rust-orange-light), var(--rust-orange));
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.925rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(247, 76, 0, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(247, 76, 0, 0.45);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+
+    .btn-sm {
+      padding: 0.45rem 0.8rem;
+      font-size: 0.8rem;
+      border-radius: 7px;
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
+
+    .task-item {
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 0.85rem 1.1rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .task-item:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(14, 20, 32, 0.8);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex: 1;
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--emerald);
+    }
+
+    .task-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .task-title.completed {
+      text-decoration: line-through;
+      color: var(--text-dim);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .priority-badge {
+      font-size: 0.725rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    .priority-High {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .priority-Medium {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .priority-Normal, .priority-Low {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: color 0.15s, background-color 0.15s;
+    }
+
+    .delete-btn:hover {
+      color: var(--rose);
+      background: rgba(244, 63, 94, 0.1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-dim);
+      font-size: 0.925rem;
+    }
+
+    /* API Playground */
+    .api-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .api-btn {
+      background: rgba(10, 14, 23, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.825rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .api-btn:hover {
+      border-color: var(--cyan);
+      color: var(--text-main);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .method-get { color: #34d399; font-weight: 700; }
+    .method-post { color: #38bdf8; font-weight: 700; }
+    .method-delete { color: #f43f5e; font-weight: 700; }
+
+    .code-console {
+      background: #060910;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      font-family: var(--font-mono);
+    }
+
+    /* Architecture Features */
+    .features-section {
+      margin-top: 3.5rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .section-desc {
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2rem;
+      font-size: 0.95rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--text-main);
+    }
+
+    .feature-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-top: 4rem;
+      background: rgba(10, 14, 23, 0.5);
+    }
+
+    footer a {
+      color: var(--rust-orange-light);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <span class="logo-badge">🦀</span>
+        <span>RustForge</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#dashboard" class="nav-link">Dashboard</a>
+        <a href="#tasks" class="nav-link">Task App</a>
+        <a href="#api" class="nav-link">API Explorer</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+      </nav>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span id="liveStatusText">Axum 0.8 Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="dashboard">
+    
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="pill-tag">
+        <span>⚡ Built with Rust Edition 2024 & Axum</span>
+      </div>
+      <h1>
+        High-Performance Web Applications in <span class="highlight">Rust</span>
+      </h1>
+      <p>
+        Blazing fast, concurrent, and guaranteed memory-safe. Serving dynamic full-stack experiences with zero garbage collection overhead.
+      </p>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-value" id="statLatency">-- ms</div>
+          <div class="stat-label">Server Latency</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statRequests">0</div>
+          <div class="stat-label">Requests Processed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statUptime">0s</div>
+          <div class="stat-label">Server Uptime</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Memory Safe</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Panel: Interactive Task Manager (Full Stack CRUD) -->
+      <section class="panel" id="tasks">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📋 Live Task Manager</div>
+            <div class="panel-subtitle">State managed concurrently via Rust Tokio + Arc&lt;RwLock&gt;</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="fetchTasks()">↻ Refresh</button>
+        </div>
+
+        <!-- Add Task Form -->
+        <form class="task-form" id="taskForm" onsubmit="handleAddTask(event)">
+          <input 
+            type="text" 
+            id="taskTitle" 
+            class="input-field" 
+            placeholder="Write a new task in Rust..." 
+            required 
+            autocomplete="off"
+          />
+          <select id="taskPriority" class="select-field">
+            <option value="Normal">Normal</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High 🔥</option>
+          </select>
+          <button type="submit" class="btn">
+            <span>+ Add Task</span>
+          </button>
+        </form>
+
+        <!-- Task List -->
+        <ul class="task-list" id="taskList">
+          <li class="empty-state">Loading tasks from Rust backend...</li>
+        </ul>
+      </section>
+
+      <!-- Right Panel: Interactive REST API Console -->
+      <section class="panel" id="api">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📡 Live API Playground</div>
+            <div class="panel-subtitle">Execute real HTTP requests against your Axum server</div>
+          </div>
+          <span class="status-pill" id="consoleStatus" style="font-size: 0.75rem;">Ready</span>
+        </div>
+
+        <div class="api-buttons">
+          <button class="api-btn" onclick="callApi('GET', '/api/health')">
+            <span class="method-get">GET</span> /api/health
+          </button>
+          <button class="api-btn" onclick="callApi('GET', '/api/tasks')">
+            <span class="method-get">GET</span> /api/tasks
+          </button>
+          <button class="api-btn" onclick="callApi('GET', '/api/ping')">
+            <span class="method-get">GET</span> /api/ping
+          </button>
+          <button class="api-btn" onclick="testPostTask()">
+            <span class="method-post">POST</span> /api/tasks
+          </button>
+        </div>
+
+        <div class="console-header">
+          <span id="consoleEndpoint">Endpoint: GET /api/health</span>
+          <span id="consoleTime">-- ms</span>
+        </div>
+        <div class="code-console" id="codeConsole">// Click any endpoint above to execute a live request...</div>
+      </section>
+
+    </div>
+
+    <!-- Architecture & Features -->
+    <section class="features-section" id="architecture">
+      <h2 class="section-title">Why Rust for Web Development?</h2>
+      <p class="section-desc">
+        Modern Rust provides an unmatched combination of raw speed, tiny memory footprint, and compile-time correctness guarantees.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Fearless Concurrency</h3>
+          <p>Rust's borrow checker guarantees thread safety without data races. Scale across multi-core CPUs with Tokio without mutex bugs.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Zero Garbage Collection</h3>
+          <p>Deterministic memory management means sub-millisecond tail latencies with no unpredictable GC pause spikes.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧩</div>
+          <h3>Axum Ergonomics</h3>
+          <p>Built by the Tokio team, Axum offers type-safe extractors, modular middleware, and zero-cost routing abstractions.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Single Self-Contained Binary</h3>
+          <p>Compile your entire web application, embedded assets, and API routes into a single portable native executable.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      Crafted with 🦀 Rust &bull; Powered by <strong>Axum 0.8</strong> &amp; <strong>Tokio</strong> &bull; Running locally on Windows
+    </p>
+  </footer>
+
+  <script>
+    // State
+    let latencyInterval = null;
+
+    // Fetch initial data
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchTasks();
+      updateHealthStats();
+      setInterval(updateHealthStats, 3000);
+      pingLatency();
+      setInterval(pingLatency, 5000);
+    });
+
+    // Ping Latency
+    async function pingLatency() {
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/ping');
+        if (res.ok) {
+          const duration = Math.round(performance.now() - start);
+          document.getElementById('statLatency').textContent = `${duration} ms`;
+        }
+      } catch (err) {
+        document.getElementById('statLatency').textContent = 'offline';
+      }
+    }
+
+    // Health Stats
+    async function updateHealthStats() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('statRequests').textContent = data.total_requests.toLocaleString();
+          document.getElementById('statUptime').textContent = formatUptime(data.uptime_secs);
+        }
+      } catch (err) {
+        console.warn('Health check error:', err);
+      }
+    }
+
+    function formatUptime(secs) {
+      if (secs < 60) return `${secs}s`;
+      const mins = Math.floor(secs / 60);
+      const remSecs = secs % 60;
+      if (mins < 60) return `${mins}m ${remSecs}s`;
+      const hours = Math.floor(mins / 60);
+      return `${hours}h ${mins % 60}m`;
+    }
+
+    // Tasks API
+    async function fetchTasks() {
+      const listEl = document.getElementById('taskList');
+      try {
+        const res = await fetch('/api/tasks');
+        const tasks = await res.json();
+        
+        if (!tasks || tasks.length === 0) {
+          listEl.innerHTML = `<li class="empty-state">No tasks yet! Add one above to test the Rust API.</li>`;
+          return;
+        }
+
+        listEl.innerHTML = tasks.map(task => `
+          <li class="task-item" id="task-${task.id}">
+            <div class="task-left">
+              <input 
+                type="checkbox" 
+                class="task-checkbox" 
+                ${task.completed ? 'checked' : ''} 
+                onchange="toggleTask(${task.id})"
+                title="Mark completed"
+              />
+              <span class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</span>
+            </div>
+            <div class="task-meta">
+              <span class="priority-badge priority-${task.priority}">${task.priority}</span>
+              <button class="delete-btn" onclick="deleteTask(${task.id})" title="Delete task">✕</button>
+            </div>
+          </li>
+        `).join('');
+      } catch (err) {
+        listEl.innerHTML = `<li class="empty-state" style="color: #f43f5e;">Failed to load tasks from server.</li>`;
+      }
+    }
+
+    async function handleAddTask(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById('taskTitle');
+      const priorityInput = document.getElementById('taskPriority');
+      const title = titleInput.value.trim();
+      const priority = priorityInput.value;
+
+      if (!title) return;
+
+      try {
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, priority })
+        });
+
+        if (res.ok) {
+          titleInput.value = '';
+          fetchTasks();
+          updateHealthStats();
+        }
+      } catch (err) {
+        alert('Failed to add task: ' + err.message);
+      }
+    }
+
+    async function toggleTask(id) {
+      try {
+        const res = await fetch(`/api/tasks/${id}`, { method: 'PATCH' });
+        if (res.ok) {
+          fetchTasks();
+          updateHealthStats();
+        }
+      } catch (err) {
+        console.error('Failed to toggle task:', err);
+      }
+    }
+
+    async function deleteTask(id) {
+      try {
+        const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          fetchTasks();
+          updateHealthStats();
+        }
+      } catch (err) {
+        console.error('Failed to delete task:', err);
+      }
+    }
+
+    // API Console Helper
+    async function callApi(method, endpoint, body = null) {
+      const consoleEl = document.getElementById('codeConsole');
+      const statusEl = document.getElementById('consoleStatus');
+      const endpointEl = document.getElementById('consoleEndpoint');
+      const timeEl = document.getElementById('consoleTime');
+
+      endpointEl.textContent = `Endpoint: ${method} ${endpoint}`;
+      statusEl.textContent = 'Calling...';
+      consoleEl.textContent = 'Sending request...';
+
+      const start = performance.now();
+      try {
+        const opts = { method };
+        if (body) {
+          opts.headers = { 'Content-Type': 'application/json' };
+          opts.body = JSON.stringify(body);
+        }
+
+        const res = await fetch(endpoint, opts);
+        const duration = Math.round(performance.now() - start);
+        timeEl.textContent = `${duration} ms`;
+        statusEl.textContent = `HTTP ${res.status} ${res.statusText}`;
+
+        let text = await res.text();
+        try {
+          const json = JSON.parse(text);
+          text = JSON.stringify(json, null, 2);
+        } catch (_) {}
+
+        consoleEl.textContent = text;
+      } catch (err) {
+        statusEl.textContent = 'Failed';
+        timeEl.textContent = '-- ms';
+        consoleEl.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    function testPostTask() {
+      const sampleTitles = [
+        'Profile Axum async throughput',
+        'Deploy Rust binary to production',
+        'Implement WebSocket real-time channel',
+        'Benchmark SQLite vs In-Memory Arc<RwLock>'
+      ];
+      const randomTitle = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
+      callApi('POST', '/api/tasks', {
+        title: randomTitle,
+        priority: 'High'
+      }).then(() => fetchTasks());
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
