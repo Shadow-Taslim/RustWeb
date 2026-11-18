@@ -1,5 +1,3 @@
-* @charset "UTF-8";
-
 :root {
   --primitive-paper: oklch(0.975 0.008 150);
   --primitive-paper-deep: oklch(0.925 0.012 150);
