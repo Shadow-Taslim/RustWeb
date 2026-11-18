@@ -51,6 +51,17 @@ On Linux or macOS, the equivalent is:
 HOST=0.0.0.0 PORT=8080 cargo run --release
 ```
 
+## Browser preview launcher
+
+```sh
+npm install
+npm run dev -- --port 3000
+```
+
+The npm launcher uses the real Rust/Axum server whenever Cargo is available. In preview environments without a Rust toolchain, it starts a dependency-free Node.js fallback that serves the same application files and proxies live Open-Meteo data with equivalent input validation, timeouts, sanitized errors, and security headers. It does not use mock weather data.
+
+This fallback is only for browser previews. Normal development and production remain `cargo run --release` and the Docker image. `npm run build` validates the preview assets and compiles the Rust release when Cargo is installed.
+
 ## Docker
 
 ```sh
@@ -91,6 +102,9 @@ RustWeb/
 ├── Cargo.toml                 # Package metadata and dependencies
 ├── Cargo.lock                 # Reproducible dependency graph
 ├── Dockerfile                 # Multi-stage production image
+├── package.json               # npm preview commands
+├── preview-server.mjs         # Rust-first preview launcher and fallback
+├── index.html                 # Preview entry copy of static/index.html
 ├── ci.yml.example             # Optional GitHub Actions checks
 ├── src/
 │   └── main.rs                # Axum server, provider integration, and tests
