@@ -82,7 +82,7 @@ cargo build --release --locked
 node --check static/app.js
 ```
 
-The Rust tests cover input validation, units, static serving, health responses, and invalid-request handling. GitHub Actions runs the same formatting, lint, test, release-build, and JavaScript syntax checks on every push and pull request.
+The Rust tests cover input validation, units, static serving, health responses, and invalid-request handling. A ready-to-use GitHub Actions configuration is included as `ci.yml.example`. To enable it, copy it to `.github/workflows/ci.yml`; it then runs the same formatting, lint, test, release-build, and JavaScript syntax checks on every push and pull request.
 
 ## Project structure
 
@@ -91,6 +91,7 @@ RustWeb/
 ├── Cargo.toml                 # Package metadata and dependencies
 ├── Cargo.lock                 # Reproducible dependency graph
 ├── Dockerfile                 # Multi-stage production image
+├── ci.yml.example             # Optional GitHub Actions checks
 ├── src/
 │   └── main.rs                # Axum server, provider integration, and tests
 ├── static/
@@ -100,7 +101,6 @@ RustWeb/
 │   ├── manifest.webmanifest   # Installable app metadata
 │   ├── sw.js                  # Static-asset service worker
 │   └── icons/icon.svg         # Nimbus app icon
-└── .github/workflows/ci.yml   # Automated checks
 ```
 
 ## Data and privacy
