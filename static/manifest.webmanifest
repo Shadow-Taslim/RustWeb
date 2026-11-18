@@ -1,0 +1,20 @@
+{
+  "name": "Nimbus Weather",
+  "short_name": "Nimbus",
+  "description": "Clear local forecasts, powered by Rust and Open-Meteo.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#f7f8f5",
+  "categories": ["weather", "utilities"],
+  "icons": [
+    {
+      "src": "/static/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

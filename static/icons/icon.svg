@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Nimbus Weather app icon</title>
+  <desc id="description">A teal cloud crossing in front of an orange sun</desc>
+  <rect width="512" height="512" rx="108" fill="#f7f8f5"/>
+  <circle cx="356" cy="151" r="72" fill="#e78f4e"/>
+  <path d="M135 358c-46 0-83-33-83-75s37-75 83-75c15 0 29 4 41 10 20-49 65-83 117-83 71 0 128 52 128 116v5c34 7 59 35 59 67 0 39-32 70-72 70H135Z" fill="#8bc3bd" stroke="#171a18" stroke-width="20" stroke-linejoin="round"/>
+</svg>
